@@ -1,47 +1,27 @@
 package com.example.postgresdemo.controller;
 
-import com.example.postgresdemo.model.Employee;
-
-import com.example.postgresdemo.model.EmployeeAssignment;
-import com.example.postgresdemo.model.EmployeeSurveys;
-import com.example.postgresdemo.repository.EmployeeRepository;
+import com.example.postgresdemo.model.Survey;
+import com.example.postgresdemo.repository.SurveyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-;import java.util.List;
+
+;import javax.validation.Valid;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
-public class EmployeeController {
+public class SurveyController {
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private SurveyRepository surveyRepository;
 
-
-    //fetch EMPLOYEE by PROJECT
-    //fetch EMPLOYEES by TSM
-    //CREATE EMPLOYEE
-    //add PROJECT to EMPLOYEE
-        //ADD surveys for EMPLOYEE and PEER combination
-    //DELETE USER
-        //Delete all surveys associated with EMPLOYEE
-
-
-    @GetMapping("/employee/{employeeId}")
-    public Employee getEmployeeById(@PathVariable Long employeeId) {
-        return employeeRepository.findByEmployeeId(employeeId);
+    @GetMapping("/survey/{surveyId}")
+    public Optional<Survey> getSurveyById(@PathVariable Long surveyId) {
+        return surveyRepository.findById(surveyId);
     }
 
-    @GetMapping("/employee/{employeeId}/projects")
-    public Set<EmployeeAssignment> getEmployeeProjects(@PathVariable Long employeeId) {
-        return employeeRepository.findByEmployeeId(employeeId).getEmployeeAssignments();
+    @PostMapping("/survey")
+    public Survey createProject(@Valid @RequestBody Survey survey) {
+        return surveyRepository.save(survey);
     }
-
-    @GetMapping("/employee/{employeeId}/surveys")
-    public Set<EmployeeSurveys> getEmployeeSurveys(@PathVariable Long employeeId) {
-        return employeeRepository.findByEmployeeId(employeeId).getEmployeeSurveys();
-    }
-
-
-
-
 }

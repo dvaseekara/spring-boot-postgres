@@ -1,7 +1,9 @@
-package com.example.postgresdemo;
+package com.example.postgresdemo.repositoryIntegrationtest;
 
 import com.example.postgresdemo.model.Employee;
+import com.example.postgresdemo.model.Project;
 import com.example.postgresdemo.repository.EmployeeRepository;
+import com.example.postgresdemo.repository.ProjectRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.contentOf;
 
 
 @RunWith(SpringRunner.class)
@@ -23,31 +28,41 @@ public class ProjectRepositoryIntegrationTest {
     private TestEntityManager entityManager;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private ProjectRepository projectRepository;
 
 
     @Test
-    public void whenFindByName_thenReturnEmployee() {
-        Employee dan = new Employee();
-
-        //Entity Setup
-        dan.setEmail("dvaseekara3@gmail.com");
-        dan.setFirstName("Daniel");
-        dan.setLastName("Vaseekaran");
-        dan.setPmId(1);
-        dan.setRoleId(2);
-        dan.setTsmId(1);
-
-        entityManager.persist(dan);
+    public void insertProject() {
+        Project consultant360  = new Project((long) 1, "Consultant 360", "Streamlining peer feedback", 1, "ongoing", "incomplete");
+        entityManager.persist(consultant360);
         entityManager.flush();
 
         // when
-        Employee found = employeeRepository.findByFirstName("Daniel");
+        Optional<Project> found = projectRepository.findById((long) 1);
 
         //then
-        assertThat(found.getLastName())
-                .isEqualTo(dan.getLastName());
+        assertThat(found.get().getProjectName())
+                .isEqualTo(consultant360.getProjectName());
 
     }
 
+    @Test
+    public void assignProjectToEmployee(){
+
+    }
+
+    @Test
+    public void assignSecondProjectToEmployee(){
+
+    }
+
+    @Test
+    public void validateProjectSurveys(){
+
+    }
+
+    @Test
+    public void deleteProject(){
+
+    }
 }

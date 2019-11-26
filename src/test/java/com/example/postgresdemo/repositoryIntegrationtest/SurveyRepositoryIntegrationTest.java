@@ -1,7 +1,9 @@
-package com.example.postgresdemo;
+package com.example.postgresdemo.repositoryIntegrationtest;
 
 import com.example.postgresdemo.model.Employee;
 import com.example.postgresdemo.repository.EmployeeRepository;
+import com.example.postgresdemo.repository.SurveyRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,31 +25,39 @@ public class SurveyRepositoryIntegrationTest {
     private TestEntityManager entityManager;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
-
+    private SurveyRepository surveyRepository;
 
     @Test
-    public void whenFindByName_thenReturnEmployee() {
-        Employee dan = new Employee();
+    public void employeeAssignment() {
 
-        //Entity Setup
-        dan.setEmail("dvaseekara3@gmail.com");
-        dan.setFirstName("Daniel");
-        dan.setLastName("Vaseekaran");
-        dan.setPmId(1);
-        dan.setRoleId(2);
-        dan.setTsmId(1);
-
-        entityManager.persist(dan);
-        entityManager.flush();
-
-        // when
-        Employee found = employeeRepository.findByFirstName("Daniel");
-
-        //then
-        assertThat(found.getLastName())
-                .isEqualTo(dan.getLastName());
 
     }
+
+    @Test
+    public void addToolRatingToSurvey(){
+
+    }
+
+    @Test
+    public void updateToolRating(){
+
+    }
+
+    @Test
+    public void deleteToolRating(){
+
+    }
+
+    @Test
+    public void addSecondToolRating(){
+
+    }
+
+    @Test
+    public void deleteSurvey(){
+
+    }
+
+
 
 }

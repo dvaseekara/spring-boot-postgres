@@ -1,19 +1,28 @@
 package com.example.postgresdemo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import javax.persistence.*;
 import java.util.Date;
-import org.springframework.data.annotation.CreatedDate;
-import java.util.Set;
+import java.util.List;
 
+import org.springframework.data.annotation.CreatedDate;
 
 
 @Entity
 @Table(name = "survey")
 public class Survey extends AuditModel {
+    public Survey(Employee employee, Project project, Employee reviewer, String status) {
+        this.employee = employee;
+        this.project = project;
+        this.reviewer = reviewer;
+        this.status = status;
+        this.setCreatedAt(new Date());
+        this.setUpdatedAt(new Date());
+        //fix this
+    }
+
+    public Survey() {
+    }
+
     @Id
     @GeneratedValue(generator = "survey_generator")
     @SequenceGenerator(
@@ -21,20 +30,22 @@ public class Survey extends AuditModel {
             sequenceName = "survey_sequence",
             initialValue = 1000
     )
-    private Long surveyId;
+    private Long id;
 
     //foreign key
-    @Column(name = "employee_id", nullable = false, updatable = false)
-    @JoinColumn()
-    private Long employeeId;
+    @ManyToOne
+    @JoinColumn(name="employee_id")
+    private Employee employee;
 
     //foreign key
-    @Column(name = "reviewer_id", nullable = false, updatable = false)
-    private Long reviewerId;
+    @ManyToOne
+    @JoinColumn(name="reviewer_id")
+    private Employee reviewer;
 
     //foreign key
-    @Column(name = "project_id", insertable = false, updatable = false)
-    private Long projectId;
+    @ManyToOne
+    @JoinColumn(name="project_id")
+    private Project project;
 
     @Column(name = "status", nullable = false)
     private String status;
@@ -45,39 +56,18 @@ public class Survey extends AuditModel {
     private Date start_date;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "complete_date", nullable = false, updatable = false)
+    @Column(name = "complete_date")
     private Date complete_date;
 
-    public Long getSurveyId() {
-        return surveyId;
+    @OneToMany(mappedBy = "survey")
+    private List<SurveyToolRating> surveyToolRatings;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setSurveyId(Long surveyId) {
-        this.surveyId = surveyId;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public Long getReviewerId() {
-        return reviewerId;
-    }
-
-    public void setReviewerId(Long reviewerId) {
-        this.reviewerId = reviewerId;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getStatus() {
@@ -104,4 +94,35 @@ public class Survey extends AuditModel {
         this.complete_date = complete_date;
     }
 
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
+
+    public Employee getReviewer() {
+        return reviewer;
+    }
+
+    public void setReviewer(Employee reviewer) {
+        this.reviewer = reviewer;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public List<SurveyToolRating> getSurveyToolRatings() {
+        return surveyToolRatings;
+    }
+
+    public void setSurveyToolRatings(List<SurveyToolRating> surveyToolRatings) {
+        this.surveyToolRatings = surveyToolRatings;
+    }
 }

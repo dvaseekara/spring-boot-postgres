@@ -1,7 +1,8 @@
-package com.example.postgresdemo;
+package com.example.postgresdemo.repositoryIntegrationtest;
 
 import com.example.postgresdemo.model.Employee;
 import com.example.postgresdemo.repository.EmployeeRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import static org.assertj.core.api.Assertions.*;
 
 
@@ -24,19 +26,16 @@ public class EmployeeRepositoryIntegrationTest {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Before
+    public void setUp(){
+
+    }
+
 
     @Test
-    public void whenFindByName_thenReturnEmployee() {
-        Employee dan = new Employee();
-
-        //Entity Setup
-        dan.setEmail("dvaseekara3@gmail.com");
-        dan.setFirstName("Daniel");
-        dan.setLastName("Vaseekaran");
-        dan.setPmId(1);
-        dan.setRoleId(2);
-        dan.setTsmId(1);
-
+    public void insertEmployee() {
+        entityManager.clear();
+        Employee dan = new Employee((long) 1, "test_first", "test_last", "test@test.com", 1, 2, 2);
         entityManager.persist(dan);
         entityManager.flush();
 
@@ -45,8 +44,31 @@ public class EmployeeRepositoryIntegrationTest {
 
         //then
         assertThat(found.getLastName())
-                .isEqualTo(dan.getLastName());
+                .isEqualTo("Vaseekaran");
 
     }
+
+    @Test
+    public void addEmployeeToProject(){
+
+    }
+
+    @Test
+    public void fetchEmployeeProjects(){
+
+    }
+
+    @Test
+    public void addSecondEmployeeToProject(){
+        //validate survey creation
+    }
+
+    @Test
+    public void deleteEmployee(){
+        //validate survey deletion
+        //validate employeeAssignment deletion
+    }
+
+
 
 }

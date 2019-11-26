@@ -1,6 +1,8 @@
 package com.example.postgresdemo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -10,7 +12,7 @@ import java.util.Set;
 public class Employee extends AuditModel {
 
     public Employee(Long employeeId, String firstName, String lastName, String email, int roleId, int tsmId, int pmId) {
-        this.employeeId = employeeId;
+        this.id = employeeId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -19,6 +21,8 @@ public class Employee extends AuditModel {
         this.pmId = pmId;
     }
 
+    public Employee(){}
+
     @Id
     @GeneratedValue(generator = "employee_generator")
     @SequenceGenerator(
@@ -26,7 +30,7 @@ public class Employee extends AuditModel {
             sequenceName = "employee_sequence",
             initialValue = 1000
     )
-    private Long employeeId;
+    private Long id;
 
     @Column(name = "first_name")
     private String firstName;
@@ -46,16 +50,30 @@ public class Employee extends AuditModel {
     @Column(name = "pm_id")
     private int pmId;
 
+    @Column(name = "avatar")
+    private String avatar;
+
     @OneToMany(mappedBy = "employee")
     @JsonIgnore
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private Set<EmployeeAssignment> employeeAssignments;
 
-    public Long getEmployeeId() {
-        return employeeId;
+    @OneToMany(mappedBy= "employee")
+    @JsonIgnore
+    @OnDelete(action= OnDeleteAction.CASCADE)
+    private Set<Survey> surveys;
+
+    @OneToMany(mappedBy= "reviewer")
+    @JsonIgnore
+    @OnDelete(action= OnDeleteAction.CASCADE)
+    private Set<Survey> peerSurveys;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -114,4 +132,27 @@ public class Employee extends AuditModel {
         this.employeeAssignments = employeeAssignments;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Set<Survey> getSurveys() {
+        return surveys;
+    }
+
+    public void setSurveys(Set<Survey> surveys) {
+        this.surveys = surveys;
+    }
+
+    public Set<Survey> getPeerSurveys() {
+        return peerSurveys;
+    }
+
+    public void setPeerSurveys(Set<Survey> peerSurveys) {
+        this.peerSurveys = peerSurveys;
+    }
 }

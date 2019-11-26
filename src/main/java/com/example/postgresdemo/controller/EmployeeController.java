@@ -1,15 +1,20 @@
 package com.example.postgresdemo.controller;
 
+import com.example.postgresdemo.exception.ResourceNotFoundException;
 import com.example.postgresdemo.model.Employee;
 
 import com.example.postgresdemo.model.EmployeeAssignment;
+import com.example.postgresdemo.model.Project;
 import com.example.postgresdemo.model.Survey;
+import com.example.postgresdemo.repository.EmployeeAssignmentRepository;
 import com.example.postgresdemo.repository.EmployeeRepository;
+import com.example.postgresdemo.repository.ProjectRepository;
 import com.example.postgresdemo.repository.SurveyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 ;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,20 +27,30 @@ public class EmployeeController {
     @Autowired
     private SurveyRepository surveyRepository;
 
-    @GetMapping("/employee/{employeeId}")
-    public Employee getEmployeeById(@PathVariable Long employeeId) {
-        return employeeRepository.findByEmployeeId(employeeId);
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private EmployeeAssignmentRepository employeeAssignmentRepository;
+
+    @GetMapping("/employee/{id}")
+    public Optional<Employee> getEmployeeById(@PathVariable Long id) {
+        return employeeRepository.findById(id);
     }
 
-    @GetMapping("/employee/{employeeId}/projects")
-    public Set<EmployeeAssignment> getEmployeeProjects(@PathVariable Long employeeId) {
-        return employeeRepository.findByEmployeeId(employeeId).getEmployeeAssignments();
+    @GetMapping("/employee/{id}/projects")
+    public Set<EmployeeAssignment> getEmployeeProjects(@PathVariable Long id) {
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if(employee.isPresent()){
+            return employee.get().getEmployeeAssignments();
+        }else {
+            throw new ResourceNotFoundException("Employee not found with id " + id);
+        }
     }
 
-    @GetMapping("/employee/{employeeId}/surveys")
-    public Set<Survey> getEmployeeSurveys(@PathVariable Long employeeId) {
-        return surveyRepository.findByEmployeeId(employeeId);
-        //return surveyRepository.findByEmployeeId(employeeId);
+    @GetMapping("/employee/{id}/surveys")
+    public Set<Survey> getEmployeeSurveys(@PathVariable Long id) {
+        return surveyRepository.findByEmployeeId(id);
     }
 
     @PostMapping("/employee")
@@ -43,26 +58,47 @@ public class EmployeeController {
         return employeeRepository.save(employee);
     }
 
-    @PostMapping("/employee/addProject/{employeeId}/{project_id}")
-    public void addEmployeeToProject(@PathVariable Long employeeId, Long projectId){
-        //Insert int EmployeeAssisngment
-        //Get employees already on project
-        //For each employee, INSERT two surveys one as employee and other as reviewer
+    @PutMapping("/employee/addProject/{employeeId}/{projectId}")
+    public Set<Survey> addEmployeeToProject(@PathVariable Long employeeId, @PathVariable Long projectId){
+        Optional<Employee> employee  = employeeRepository.findById(employeeId);
+        Optional<Project> project = projectRepository.findById(projectId);
+
+        if(employeeAssignmentRepository.findByProjectIdAndEmployeeId(projectId, employeeId).isEmpty()){
+
+            if(project.isPresent() && employee.isPresent()) {
+                EmployeeAssignment employeeAssignment = new EmployeeAssignment(project.get(), employee.get(), null, null);
+
+                List<EmployeeAssignment> fetchedAssignments = employeeAssignmentRepository.findByProjectId(projectId);
+                if (!fetchedAssignments.isEmpty()) {
+                    fetchedAssignments.forEach(assignment -> {
+                        surveyRepository.save(new Survey(employee.get(), project.get(), assignment.getEmployee(), "issued"));
+                        surveyRepository.save(new Survey(assignment.getEmployee(), project.get(), employee.get(), "issued"));
+                    });
+                }
+
+                employeeAssignmentRepository.save(employeeAssignment);
+
+
+                return surveyRepository.findByProjectId(projectId);
+            }else{
+                throw new ResourceNotFoundException("Employee or Project not found for employee id " + employeeId + " and " + projectId);
+            }
+        }else{
+            throw new ResourceNotFoundException("Employee already assigned to project");
+        }
     }
 
-    @PostMapping("/employee/removeProject/{employeeId}/{project_id}")
+    @DeleteMapping("/employee/removeProject/{employeeId}/{project_id}")
     public void removeEmployeeFromProject(@PathVariable Long employeeId, Long projectId){
-        //Insert int EmployeeAssisngment
-        //DELETE SURVEY where porject_id = ? and reviewer_id = ?
-        //DELETE SURVEY where project_id = ? and employee_id = ?
+        employeeAssignmentRepository.deleteByEmployeeIdAndProjectId(employeeId, projectId);
+        surveyRepository.deleteByEmployeeIdAndProjectId(employeeId, projectId);
+        surveyRepository.deleteByReviewerIdAndProjectId(employeeId, projectId);
     }
 
-    @DeleteMapping("/employee/{employee_id}")
+    @DeleteMapping("/employee/{employeeId}")
     public void deleteEmployee(@PathVariable Long employeeId){
-        //DELETE EMPLOYEEASSIGNMENT
-        //DELETE SURVEYS where reviewer_id = ?
-        //DELETE SURVEYS where employee_id = ?
-        //DELETE EMPLOYEE where id = ?
+        employeeRepository.deleteById(employeeId);
+
     }
 
 }
